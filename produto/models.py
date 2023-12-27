@@ -3,6 +3,7 @@ from PIL import Image
 import os
 from django.db import models
 from pprint import pprint
+from django.utils.text import slugify
 
 
 
@@ -17,9 +18,9 @@ class Produto(models.Model):
     imagem = models.ImageField(
         upload_to='produto_imagens/%Y/%m', blank=True, null=True
     )
-    slug = models.SlugField(unique=True)
-    preco_marketing = models.FloatField(default=0)
-    preco_marketing_promocional = models.FloatField(default=0)
+    slug = models.SlugField(unique=True, blank=True, null=True)
+    preco_marketing = models.FloatField(default=0, verbose_name="Preço")
+    preco_marketing_promocional = models.FloatField(default=0, verbose_name="Preço Promo")
     tipo = models.CharField(
         default='V', max_length=1, choices=(
             ('V', 'Variável'), 
@@ -27,6 +28,13 @@ class Produto(models.Model):
         ),
     )
 
+    def get_preco_formatado(self):
+        return f'R$ {self.preco_marketing:.2f}'.replace('.', ',')
+    get_preco_formatado.short_description = 'Preço'  # Dando um nome ao método para ser apresentado no painel de produtos do Django-Admin
+
+    def get_preco_promocional_formatado(self):
+        return f'R$ {self.preco_marketing_promocional:.2f}'.replace('.', ',')
+    get_preco_promocional_formatado.short_description = 'Preço Promo'
 
     # Retorna o campo nome(dos produtos) quando este modelo é chamado, exemplo: QuerySet: <Produto: Celular> 
     def __str__(self):
@@ -47,9 +55,9 @@ class Produto(models.Model):
 
         # Executa o bloco IF apenas se a condição for True...
         if new_width >= original_width:
-            print()
-            print('Retornando, largura original MENOR ou IGUAL que nova largura!')
-            print()
+            # print()
+            # print('Retornando, largura original MENOR ou IGUAL que nova largura! (método resize_image() - Produto Model)')
+            # print()
             img_pil.close()
             return  # Execução do método resize_imagem será encerrada aqui mesmo. Sem continuar para as linhas subsequentes
         
@@ -58,12 +66,17 @@ class Produto(models.Model):
         # Salva a nova img por cima da original, passando o caminho que será salva, otimização e qualidade.
         nova_imagem.save(img_full_path, optimize=True, quality=60)  
         img_pil.close()
-        print()
-        print('Imagem foi redimensionada com sucesso!')
-        print()
+        # print()
+        # print('Imagem foi redimensionada com sucesso! (método resize_image() - Produto Model)')
+        # print()
 
 
     def save(self, *args, **kwargs):
+        # Criando um slug automático para cada novo Produto cadastrado
+        if not self.slug:
+            slug = f'{slugify(self.nome)}'  # Exeplo: camiseta-python-e-legal
+            self.slug = slug
+
         # Chama o super da classe pai para realmente salvar o produto cadastrado no DJANDO-ADMIN
         super().save(*args, *kwargs)
 
