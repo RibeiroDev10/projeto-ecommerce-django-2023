@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ValidationError
+from var_dump import var_dump
 from utils.validacpf import valida_cpf
 import re
 from pprint import pprint
@@ -76,6 +77,6 @@ class Perfil(models.Model):
         if error_messages:
             print()
             print('ERROR_MESSAGES ATUAIS {chave, valor}: ')
-            pprint(error_messages)
+            var_dump(error_messages)
             print()
             raise ValidationError(error_messages)

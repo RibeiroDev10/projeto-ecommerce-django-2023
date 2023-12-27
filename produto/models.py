@@ -4,6 +4,7 @@ import os
 from django.db import models
 from pprint import pprint
 from django.utils.text import slugify
+from utils.utils import utils_formata_preco
 
 
 
@@ -29,11 +30,11 @@ class Produto(models.Model):
     )
 
     def get_preco_formatado(self):
-        return f'R$ {self.preco_marketing:.2f}'.replace('.', ',')
+        return utils_formata_preco(self.preco_marketing)
     get_preco_formatado.short_description = 'Preço'  # Dando um nome ao método para ser apresentado no painel de produtos do Django-Admin
 
     def get_preco_promocional_formatado(self):
-        return f'R$ {self.preco_marketing_promocional:.2f}'.replace('.', ',')
+        return utils_formata_preco(self.preco_marketing_promocional)
     get_preco_promocional_formatado.short_description = 'Preço Promo'
 
     # Retorna o campo nome(dos produtos) quando este modelo é chamado, exemplo: QuerySet: <Produto: Celular> 

@@ -20,9 +20,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 
+
+
 urlpatterns = [
+    path('', include('produto.urls')),  # Inclui as URLS do app Produto
+    path('perfil/', include('perfil.urls')),  # Inclui as URLS do app Perfil
+    path('pedido/', include('pedido.urls')),  # Inclui as URLS do app Pedido
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
 
 if settings.DEBUG:
     import debug_toolbar
