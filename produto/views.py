@@ -29,6 +29,10 @@ class DetalheProduto(DetailView):
 
 class AdicionarAoCarrinho(View):
     def get(self, *args, **kwargs):
+        # if self.request.session.get('carrinho'):
+        #     del self.request.session['carrinho']
+        #     self.request.session.save()
+
         # self.request --> pega a requisição HTTP atual: <WSGIRequest: GET '/adicionaraocarrinho/?vid=6'>
         # Exemplo de retorno da chave ['HTTP_REFERER'] --> 'http://127.0.0.1:8000/faca'
         http_referer = self.request.META.get('HTTP_REFERER', reverse('produto:lista'))
@@ -50,6 +54,22 @@ class AdicionarAoCarrinho(View):
         # Obtenha algum objeto do modelo Variacao com base no id do get
         # Exemplo de <Modelo: Objeto> --> <Variacao: Faca>
         variacao = get_object_or_404(Variacao, id=variacao_id)
+        variacao_estoque = variacao.estoque
+        produto = variacao.produto
+        produto_id = produto.id  # type: ignore
+        produto_nome = produto.nome
+        variacao_nome = variacao.nome or ''
+        preco_unitario = variacao.preco
+        preco_unitario_promocional = variacao.preco_promocional
+        quantidade = 1
+        slug = produto.slug
+        imagem = produto.imagem
+
+        # Se existir imagem
+        if imagem:
+            imagem = imagem.name  # Atribuindo o nome da imagem para a variavel imagem
+        else:
+            imagem = ''
 
         if variacao.estoque < 1:
             messages.error(
@@ -59,7 +79,7 @@ class AdicionarAoCarrinho(View):
             # De volta à página anterior
             return redirect(http_referer)
 
-        # self.request.session) --> <django.contrib.sessions.backends.db.SessionStore object at 0x000001D6A5341FD0>
+        # self.request.session --> <django.contrib.sessions.backends.db.SessionStore object at 0x000001D6A5341FD0>
         if not self.request.session.get('carrinho'):
             self.request.session['carrinho'] = {}  # Cria um novo dict (vazio) na chave ['carrinho']
             self.request.session.save()
@@ -67,34 +87,101 @@ class AdicionarAoCarrinho(View):
         # self.request.session.get('carrinho')) --> {} # Dict vazio criado no bloco if acima ^
         carrinho = self.request.session['carrinho']
 
-        # Caso o id da variação exista no carrinho
+        # Se já existir uma Variação no Carrinho, vamos acrescentar mais um, no índice 'quantidade'
         if variacao_id in carrinho:
-            ...
-        # Se não existir adiciona o id da variação na chave do ['carrinho']    
-        else:
-            dicionario = carrinho[variacao_id]
-            print('carrinho[variacao_id]')
-            pprint(dicionario)
-            print()
+            # Variaveis para controle interno da quantidade da variação de um produto dentro de um carrinho
+            quantidade_carrinho = carrinho[variacao_id]['quantidade']
+            quantidade_carrinho = quantidade_carrinho + 1
+
+            print('Estoque de variação: ')
+            pprint(variacao_estoque)
+
+            # Se não houver estoque para aquela quantidade da Variação no carrinho
+            if variacao_estoque < quantidade_carrinho:
+                messages.warning(
+                    self.request,
+                    f'Estoque insuficiente para {quantidade_carrinho}x no '
+                    f'produto "{produto_nome}". Adicionamos {variacao_estoque}x '
+                    f'no seu carrinho'
+                )
+                print('quantidade_carrinho: ', quantidade_carrinho)
+                print('variacao_estoque: ', variacao_estoque)
+                quantidade_carrinho = variacao_estoque
             
+            carrinho[variacao_id]['quantidade'] = quantidade_carrinho
+            carrinho[variacao_id]['preco_quantitativo'] = preco_unitario * quantidade_carrinho
+            carrinho[variacao_id]['preco_quantitativo_promocional'] = preco_unitario_promocional * quantidade_carrinho
+
+        # Se não existir adiciona o id da variação na chave do ['carrinho']
+        else:
+            # chave 'carrinho' vai ter outros indices dentro dela 
+            # por que que estamos associando [variavel_id] como indices da chave 'carrinho'
+            # Entao a lógica é: Acessarmos o carrinho, e dentro do carrinho temos o id da variação, 
+            # Dentro desse id da variação temos acesso aos atributos desejados do produto
+            # A lógica da estrutura neste caso é: CHAVE-ÍNDICE-VALORES
             carrinho[variacao_id] = {
-
+                "produto_id": produto_id,
+                "produto_nome" : produto_nome,
+                "variacao_nome" : variacao_nome,
+                "variacao_id" : variacao_id,
+                "preco_unitario" : preco_unitario,
+                "preco_unitario_promocional" : preco_unitario_promocional,
+                "preco_quantitativo": preco_unitario,
+                "preco_quantitativo_promocional": preco_unitario_promocional,
+                "quantidade" : 1,
+                "slug" : slug,
+                "imagem" : imagem,
             }
+        
+        # Salvando a sessão após incluir o produto no carrinho
+        self.request.session.save()
 
+        messages.success(
+            self.request,
+            f'Produto {produto_nome} {variacao_nome} adicionado ao seu carrinho.'
+            f'{carrinho[variacao_id]["quantidade"]}x.'
+        )
 
-        return HttpResponse(f'{variacao.produto} {variacao.nome}')
+        return redirect(http_referer)
 
 
 
 class RemoverDoCarrinho(View):
     def get(self, *args, **kwargs):
-        return HttpResponse('RemoverDoCarrinho')
+        http_referer = self.request.META.get('HTTP_REFERER', reverse('produto:lista'))
+        variacao_id = self.request.GET.get("vid")
+        carrinho = self.request.session['carrinho']
+
+        if not variacao_id:
+            return redirect(http_referer)
+
+        if not carrinho:
+            return redirect(http_referer)
+        
+        if variacao_id not in carrinho:
+            return redirect(http_referer)
+
+        produto_nome = carrinho[variacao_id]['produto_nome']
+        variacao_produto = carrinho[variacao_id]['variacao_nome']
+        messages.success(
+            self.request,
+            f'Produto {produto_nome} {variacao_produto} removido do carrinho'
+        )
+
+        del carrinho[variacao_id]
+        self.request.session.save()
+
+        return redirect(http_referer)
+        
 
 
 
 class Carrinho(View):
     def get(self, *args, **kwargs):
-        return HttpResponse('Carrinho')
+        return render(
+            self.request, 
+            'produto/carrinho.html',
+        )
 
 
 
