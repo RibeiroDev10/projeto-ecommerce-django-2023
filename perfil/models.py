@@ -76,7 +76,7 @@ class Perfil(models.Model):
         # Se existir error_messages (se error_messages for True)
         if error_messages:
             print()
-            print('ERROR_MESSAGES ATUAIS {chave, valor}: ')
+            print('ERROR_MESSAGES DO MODELO PERFIL {chave, valor}: ')
             var_dump(error_messages)
             print()
             raise ValidationError(error_messages)

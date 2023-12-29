@@ -93,9 +93,6 @@ class AdicionarAoCarrinho(View):
             quantidade_carrinho = carrinho[variacao_id]['quantidade']
             quantidade_carrinho = quantidade_carrinho + 1
 
-            print('Estoque de variação: ')
-            pprint(variacao_estoque)
-
             # Se não houver estoque para aquela quantidade da Variação no carrinho
             if variacao_estoque < quantidade_carrinho:
                 messages.warning(
@@ -104,8 +101,6 @@ class AdicionarAoCarrinho(View):
                     f'produto "{produto_nome}". Adicionamos {variacao_estoque}x '
                     f'no seu carrinho'
                 )
-                print('quantidade_carrinho: ', quantidade_carrinho)
-                print('variacao_estoque: ', variacao_estoque)
                 quantidade_carrinho = variacao_estoque
             
             carrinho[variacao_id]['quantidade'] = quantidade_carrinho
@@ -175,7 +170,6 @@ class RemoverDoCarrinho(View):
         
 
 
-
 class Carrinho(View):
     def get(self, *args, **kwargs):
         return render(
@@ -185,6 +179,6 @@ class Carrinho(View):
 
 
 
-class Finalizar(View):
+class ResumoDaCompra(View):
     def get(self, *args, **kwargs):
         return HttpResponse('Finalizar')
