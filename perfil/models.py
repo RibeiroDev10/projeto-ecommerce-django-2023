@@ -57,9 +57,6 @@ class Perfil(models.Model):
     )
 
     def __str__(self):
-        # print()
-        # print('Dir de self.usuario:')
-        # pprint(vars(self.usuario))
         return f'{self.usuario}'
 
     def clean(self):
