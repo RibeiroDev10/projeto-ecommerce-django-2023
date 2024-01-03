@@ -8,6 +8,7 @@ from django.views.generic.detail import DetailView
 from django.views import View
 from django.http import HttpResponse
 from produto.models import Produto, Variacao
+from perfil.models import Perfil
 
 
 
@@ -181,4 +182,29 @@ class Carrinho(View):
 
 class ResumoDaCompra(View):
     def get(self, *args, **kwargs):
-        return HttpResponse('Finalizar')
+        if not self.request.user.is_authenticated:
+            return redirect('perfil:criar')
+        
+        # Checar se usuário tem perfil
+        perfil = Perfil.objects.filter(usuario=self.request.user).exists()
+        
+        if not perfil:
+            messages.error(
+                self.request,
+                'Usuário sem perfil'
+            )
+            redirect('perfil:criar')
+
+        if not self.request.session.get('carrinho'):
+            messages.error(
+                self.request,
+                'Carrinho vazio'
+            )
+            redirect('produto:lista')
+        
+        contexto = {
+            'usuario': self.request.user,
+            'carrinho': self.request.session['carrinho']
+        }
+
+        return render(self.request, 'produto/resumodacompra.html', contexto)

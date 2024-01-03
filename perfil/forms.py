@@ -73,51 +73,35 @@ class UserForm(forms.ModelForm):
         error_msg_password_short = 'Sua senha precisa ter pelo menos 6 caracteres'
         error_msg_required_field = 'Este campo é obrigatório'
         
-        # Usuários logados: atualização
+        # Realiza consultas ao banco de dados para verificar a existência de usuário e e-mail.
         if self.usuario:
-
-            # Verifica se o nome de usuário existe no banco de dados e não é o mesmo do usuário atual
             if usuario_db:
-                if usuario_data != usuario_db.username:  # type:ignore
+                if usuario_data != usuario_db.username:
                     validation_error_messages['username'] = error_msg_user_exists
-            
-            # Verifica se o endereço de e-mail existe no banco de dados e não é o mesmo do usuário atual
             if email_db:
-                if email_data != email_db.email:  # type:ignore
+                if email_data != email_db.email:
                     validation_error_messages['email'] = error_msg_email_exists
-            
-            # Verifica correspondência e comprimento da senha se uma senha estiver sendo fornecida
             if senha_data:
                 if senha_data != senha2_data:
                     validation_error_messages['senha'] = error_msg_password_match
                     validation_error_messages['senha2'] = error_msg_password_match
                 if len(senha_data) < 6:
                     validation_error_messages['senha'] = error_msg_password_short
-        
-        # Usuários não logados: cadastro
         else:
-            # Verifica se o nome de usuário já existe no banco de dados
-            if usuario_db:  # type: ignore
+            if usuario_db:
                 validation_error_messages['username'] = error_msg_user_exists
-            
-            # Verifica se o endereço de e-mail já existe no banco de dados
-            if email_db:  # type: ignore
+            if email_db:
                 validation_error_messages['email'] = error_msg_email_exists
-
-            # Verifica se a senha foi fornecida
             if not senha_data:
                 validation_error_messages['senha'] = error_msg_required_field
                 validation_error_messages['senha2'] = error_msg_required_field
-
-            # Verifica se as senhas coincidem
             if senha_data != senha2_data:
                 validation_error_messages['senha'] = error_msg_password_match
                 validation_error_messages['senha2'] = error_msg_password_match
-
-                # Verifica se a senha atende ao comprimento mínimo
+                
                 if len(senha_data) < 6:
                     validation_error_messages['senha'] = error_msg_password_short
 
-        # Se houver mensagens de erro, lança uma exceção de validação do formulário
         if validation_error_messages:
-            raise(forms.ValidationError(validation_error_messages))
+            raise forms.ValidationError(validation_error_messages)
+

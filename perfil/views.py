@@ -162,7 +162,7 @@ class Criar(BasePerfil):
             "Você fez login e pode concluir a sua compra."
         )
 
-        return redirect('perfil:criar')
+        return redirect('produto:carrinho')
 
 
 

@@ -142,7 +142,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # Uma lista de diretórios adicionais dos quais o Django deve coletar arquivos estáticos. 
 # Aqui, os.path.join('static') especifica que deve procurar arquivos estáticos no diretório static do seu projeto.
 STATICFILES_DIRS = [
-    os.path.join('templates/static')
+    os.path.join(BASE_DIR, 'templates/static')
 ]
 
 # Define o prefixo para construir URLs dos arquivos de mídia (como uploads de usuários). 
