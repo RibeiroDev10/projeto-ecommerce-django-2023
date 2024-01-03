@@ -12,6 +12,7 @@ class Pedido(models.Model):
     
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)  # Apago usuário --> apago também os pedidos que pertenciam à aquele usuário
     total = models.FloatField()
+    qtd_total = models.PositiveIntegerField()
     status = models.CharField(
         default='C', max_length=1,
         choices=(
@@ -25,9 +26,6 @@ class Pedido(models.Model):
     )
 
     def __str__(self):
-        print()
-        print(f'SELF PK (DO MODEL Pedido) {self.pk}')
-        print()
         return f'Pedido Nº {self.pk}'
 
 
@@ -49,7 +47,4 @@ class ItemPedido(models.Model):
     imagem = models.CharField(max_length=2000)
 
     def __str__(self):
-        print()
-        print(f'SELF PEDIDO (DO MODEL ItemPedido): {self.pedido}')
-        print()
         return f'Item do {self.pedido}'
