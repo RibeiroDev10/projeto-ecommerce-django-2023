@@ -1,6 +1,6 @@
 from django.urls import path
 from var_dump import var_dump
-from produto.views import ListaProdutos, DetalheProduto, AdicionarAoCarrinho, RemoverDoCarrinho, Carrinho, ResumoDaCompra
+from produto.views import Busca, ListaProdutos, DetalheProduto, AdicionarAoCarrinho, RemoverDoCarrinho, Carrinho, ResumoDaCompra
 
 
 
@@ -14,4 +14,5 @@ urlpatterns = [
     path('removerdocarrinho/', RemoverDoCarrinho.as_view(), name='removerdocarrinho'),
     path('carrinho/', Carrinho.as_view(), name='carrinho'),
     path('resumodacompra/', ResumoDaCompra.as_view(), name='resumodacompra'),
+    path('busca/', Busca.as_view(), name='busca'),
 ]

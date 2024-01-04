@@ -12,7 +12,7 @@
                 <div class="card">
                     <!--Se existir imagem-->
                     {% if produto.imagem %}
-                    <a href="{{ produto.slug }}">
+                    <a href="{% url 'produto:detalhe' produto.slug %}">
                         <img class="card-img-top" src="{{ produto.imagem.url }}" alt="{{ produto.nome }}">
                         {% endif %}
                     </a>
