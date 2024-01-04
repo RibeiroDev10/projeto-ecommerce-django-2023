@@ -12,6 +12,18 @@ from .models import Pedido, ItemPedido
 
 
 class Pagar(View):
+    def get(self, *args, **kwargs):
+        return HttpResponse('Pagar')
+
+
+
+class Lista(View):
+    def get(self, *args, **kwargs):
+        return HttpResponse('Lista')
+
+
+
+class SalvarPedido(View):
     template_name = 'pedido/pagar.html'
     
     def get(self, *args, **kwargs):
@@ -94,18 +106,6 @@ class Pagar(View):
 
         del self.request.session['carrinho']
         return redirect('pedido:lista')
-
-
-
-class Lista(View):
-    def get(self, *args, **kwargs):
-        return HttpResponse('Lista')
-
-
-
-class SalvarPedido(View):
-    def get(self, *args, **kwargs):
-        return HttpResponse('Fechar Pedido')
 
 
 
