@@ -17,6 +17,7 @@ class ListaProdutos(ListView):
     template_name = 'produto/lista.html'  # Ao acessar a URL raiz de produto.urls, vai chamar essa view(ListaProdutos) e renderizar este template.
     context_object_name = 'produtos'
     paginate_by = 10
+    ordering = ['-id']
 
 
 
