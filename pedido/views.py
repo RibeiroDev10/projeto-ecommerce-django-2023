@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse # type: ignore
 from pprint import pprint
 from var_dump import var_dump
-from django.views.generic.list import ListView 
+from django.views.generic import ListView, DetailView
 from django.views import View
 from django.http import HttpResponse
 from django.contrib import messages
@@ -11,9 +11,36 @@ from .models import Pedido, ItemPedido
 
 
 
-class Pagar(View):
-    def get(self, *args, **kwargs):
-        return HttpResponse('Pagar')
+class DispatchLoginRequired(View):
+    def dispatch(self, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect('perfil:criar ')
+
+        return super().dispatch(*args, **kwargs)
+
+
+
+class Pagar(DispatchLoginRequired, DetailView):
+    template_name = 'pedido/pagar.html'
+    model = Pedido
+    pk_url_kwarg = 'pk'
+    context_object_name = 'pedido'
+
+    def get_query_set(self, *args, **kwargs):
+        qs = super().get_queryset(*args, **kwargs)
+        qs = qs.filter(usuario=self.request.user)
+        return qs
+
+    # --------------------------------------------------- Função para debugar a variavel de contexto
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     itempedidos = self.object.itempedido_set.all()
+    #     for linha in itempedidos:
+    #         print()
+    #         pprint(linha.pedido_id)
+    #         print()
+    #     return context
+    # --------------------------------------------------- Função para debugar a variavel de contexto
 
 
 
@@ -103,9 +130,18 @@ class SalvarPedido(View):
                 ) for v in carrinho.values()
             ]
         )
-
+        print('Pedido inteiro: ', pedido)
+        print('Pedido ID: ', pedido.id)
+        print('Pedido PK: ', pedido.pk)
         del self.request.session['carrinho']
-        return redirect('pedido:lista')
+        return redirect(
+            reverse(
+                'pedido:pagar',
+                kwargs={
+                    'pk': pedido.pk
+                }
+            )
+        )
 
 
 
